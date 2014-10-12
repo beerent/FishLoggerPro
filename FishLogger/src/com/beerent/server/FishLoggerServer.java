@@ -23,9 +23,9 @@ public class FishLoggerServer {
 		Socket socket;
 		try {
 			while (true){
+				System.out.println("listening for connection.");
 				socket = this.serverSocket.accept();
 				new Connector(socket, connectionManager).newConnection();
-				//TODO print to log who connected 
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

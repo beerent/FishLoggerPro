@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 public class Connector {
@@ -47,13 +48,7 @@ public class Connector {
 		}
 		return null;
 	}
-	
-	
-	private void service(String[] request){
-		if (request[0] == "add_fish") databaseHandler.addFish(username, in, out, Arrays.copyOfRange(request, 1, request.length));
-		if (request[0] == "get_fish") databaseHandler.getFish(username, in, out, Arrays.copyOfRange(request, 1, request.length));
-	}
-	
+
 	/*
 	 * handles a new connection from the client
 	 */
@@ -63,28 +58,61 @@ public class Connector {
 		
 		//breaks the request into an array, delimited by a ";" character
 		String[] request = readFromClient().split("[;]");
+		String option = request[0];
+		request = Arrays.copyOfRange(request, 1, request.length);
 		
-		//if the first String == connectionKey, the rest of the [] is a request, so we pass it to service()
-		String user = connectionManager.getConnectionKey(request[0]);
-		if(user != null){
-			this.username = user;
-			service(Arrays.copyOfRange(request, 1, request.length));
-		}
-			
-		// if the first String == username, then the second String 2 == password, lets authenticate, and add
-		// the user as an active user.
-		else if (validateCredentials(request[0], request[1])){
-			connectionManager.addConnection(request[0]);
-			out.println(connectionManager.getConnectionKey(request[0]));
-		}else
-			//invalid request or denied attempt, close connection.
-			out.println("BYE");
+		if (option.equals("new"))           addNewUser(request);
+		else if (option.equals("login"))    validateCredentials(request);
+		else if(option.equals("add"))       addFish(request);
+		else if(option.equals("get"))       getFish();
+		closeConnection();
 	}
 	
-	// returns true if the user passed in valid password
-	private boolean validateCredentials(String username, String password){
-		this.username = username;
-		return true;
+	private void addNewUser(String[] information){
+		try {
+			boolean result = databaseHandler.addUser(information[0], information[1]);
+			if (result){
+				out.println("1");
+			}else{
+				out.println("-1");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void validateCredentials(String[] credentials){
+		this.username = credentials[0];
+		String password = credentials[1];
+		try {
+			boolean result = databaseHandler.validateUser(this.username, password);
+			if (result){
+				//generate and send key
+				String key = connectionManager.addConnection(this.username);
+				out.println(key);
+			}else{
+				//authentication denied
+				out.println("-1");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void addFish(String [] request){
+		//get user via connection string
+		System.out.println("got client: " + request[0]);
+		String user = connectionManager.getUserByConnectionKey(request[0]);
+		if (user == null)
+			out.println("-1");
+		else{
+			this.username = user;
+			out.println("1");
+		}
+	}
+	
+	private void getFish(){
+		
 	}
 	
 	//closes the socket connection with client
@@ -97,5 +125,3 @@ public class Connector {
 		}
 	}
 }
-
-

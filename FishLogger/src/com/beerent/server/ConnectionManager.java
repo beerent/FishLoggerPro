@@ -29,9 +29,11 @@ public class ConnectionManager {
 	}
 	
 	// adds a user to both maps; connections and timer
-	public void addConnection(String user){
-		this.connections.put(user, generateKey());
+	public String addConnection(String user){
+		String key = generateKey();
+		this.connections.put(user, key);
 		this.timer.put(getConnectionKey(user), System.nanoTime());
+		return key;
 	}
 	
 	//returns the connectionKey for a given user
@@ -41,9 +43,11 @@ public class ConnectionManager {
 	
 	//returns true of the 
 	public String getUserByConnectionKey(String connectionKey){
-		for(String user: connections.keySet())
+		for(String user: connections.keySet()){
+			System.out.println("trying user: " + user);
 			if (connections.get(user).equals(connectionKey))
 				return user;
+		}
 		return null;
 	}
 	
