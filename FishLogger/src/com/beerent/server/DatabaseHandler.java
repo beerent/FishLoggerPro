@@ -30,13 +30,13 @@ public class DatabaseHandler {
 		}		  
 	}
 	
-	private void addFish(String username, BufferedReader in, PrintWriter out, String [] info){
+	//public String selectStatement(String [] statement){
 		
-	}
+	//}
 	
-	private void getFish(String username, BufferedReader in, PrintWriter out, String [] info){
+	//public String insertStatement(String [] statement){
 		
-	}
+	//}
 	
 	public boolean addUser(String username, String password) throws SQLException{
 		stmt = createStatement();

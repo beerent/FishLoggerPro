@@ -3,6 +3,7 @@ package com.beerent.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
@@ -57,20 +58,30 @@ public class Connector {
 		out.println("OK");
 		
 		//breaks the request into an array, delimited by a ";" character
-		String[] request = readFromClient().split("[;]");
-		String option = request[0];
-		request = Arrays.copyOfRange(request, 1, request.length);
+		String request = readFromClient();
+		System.out.println("got: " + request);
 		
-		if (option.equals("new"))           addNewUser(request);
-		else if (option.equals("login"))    validateCredentials(request);
-		else if(option.equals("add"))       addFish(request);
-		else if(option.equals("get"))       getFish();
+		if (request.equals("new"))           addNewUser();
+		else if (request.equals("login"))    validateCredentials();
+		else{
+			String user = connectionManager.getUserByConnectionKey(request);
+			if(user != null){
+				out.println("OK");
+				request = readFromClient();
+				if(request.equals("add")) insertStatement();
+				if(request.equals("get")) selectStatement();
+			}	
+		}
 		closeConnection();
 	}
 	
-	private void addNewUser(String[] information){
+	private void addNewUser(){
+		out.println("OK");
+		String username = readFromClient();
+		out.println("OK");
+		String password = readFromClient();
 		try {
-			boolean result = databaseHandler.addUser(information[0], information[1]);
+			boolean result = databaseHandler.addUser(username, password);
 			if (result){
 				out.println("1");
 			}else{
@@ -81,16 +92,22 @@ public class Connector {
 		}
 	}
 
-	private void validateCredentials(String[] credentials){
-		this.username = credentials[0];
-		String password = credentials[1];
+	private void validateCredentials(){
+		out.println("OK");
+		String username = readFromClient();
+		out.println("OK");
+		String password = readFromClient();
+		
+		this.username = username;
 		try {
 			boolean result = databaseHandler.validateUser(this.username, password);
 			if (result){
 				//generate and send key
 				String key = connectionManager.addConnection(this.username);
+				System.out.println("user: " + username + " authenticated");
 				out.println(key);
 			}else{
+				System.out.println("user denied");
 				//authentication denied
 				out.println("-1");
 			}
@@ -99,19 +116,22 @@ public class Connector {
 		}
 	}
 	
-	private void addFish(String [] request){
-		//get user via connection string
-		System.out.println("got client: " + request[0]);
-		String user = connectionManager.getUserByConnectionKey(request[0]);
-		if (user == null)
-			out.println("-1");
-		else{
-			this.username = user;
-			out.println("1");
+	private void insertStatement(){
+		System.out.println("add statement");
+		out.println("OK");
+		try {
+			ObjectInputStream inputStream = new ObjectInputStream(this.socket.getInputStream());
+			System.out.println("input stream instantiated");
+			Catch c = (Catch) inputStream.readObject();
+			System.out.println("catch obj received");		
+			System.out.println(c);
+			out.println("OK!");
+		} catch (Exception e) {
+			System.out.println("fail catching Catch object!");
 		}
 	}
 	
-	private void getFish(){
+	private void selectStatement(){
 		
 	}
 	

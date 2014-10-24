@@ -37,6 +37,7 @@ public class FishLoggerServer {
 			try{
 				serverSocket = new ServerSocket(port);
 				connectionManager = new ConnectionManager();
+				connectionManager.start();
 			}catch(Exception e){
 				e.printStackTrace();
 			}

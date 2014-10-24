@@ -21,7 +21,7 @@ public class TestClient {
 		TestClient testClient = new TestClient("beerent", "password1");
 		//testClient.testNewUser(username, password);
 		testClient.testLogin(username, password);
-		testClient.testAddFish();
+		//testClient.testAddFish();
 		
 	}
 	
