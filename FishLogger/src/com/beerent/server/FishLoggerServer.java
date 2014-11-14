@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class FishLoggerServer {
-	private static ServerSocket serverSocket;
-	private static ConnectionManager connectionManager;
+	private ServerSocket serverSocket;
+	public ConnectionManager connectionManager;
 	
 	public static void main(String [] args){
 		FishLoggerServer fishLoggerServer = new FishLoggerServer(5678);
@@ -25,7 +25,7 @@ public class FishLoggerServer {
 			while (true){
 				System.out.println("listening for connection.");
 				socket = this.serverSocket.accept();
-				new Connector(socket, connectionManager).newConnection();
+				new Connector(socket, connectionManager).start();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -37,7 +37,7 @@ public class FishLoggerServer {
 			try{
 				serverSocket = new ServerSocket(port);
 				connectionManager = new ConnectionManager();
-				connectionManager.start();
+				//connectionManager.start();
 			}catch(Exception e){
 				e.printStackTrace();
 			}

@@ -62,6 +62,7 @@ public class ConnectionManager extends Thread{
 	
 	//returns true of the 
 	public String getUserByConnectionKey(String connectionKey){
+		System.out.println("trying to get user...");
 		for(String user: connections.keySet()){
 			System.out.println("trying user: " + user);
 			if (connections.get(user).equals(connectionKey))

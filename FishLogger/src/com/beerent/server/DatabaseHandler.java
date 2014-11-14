@@ -3,6 +3,7 @@ package com.beerent.server;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.sql.*;
+import java.util.Date;
 
 public class DatabaseHandler {
 	private Connection conn;
@@ -30,13 +31,40 @@ public class DatabaseHandler {
 		}		  
 	}
 	
-	//public String selectStatement(String [] statement){
-		
-	//}
+	public String getNextCatchForUser(String username){
+		stmt = createStatement();
+		String sql = "select catchID from catch where username = '" + username + "' order by catchID desc limit 1";
+		ResultSet result = execute(sql);
+		if (result == null) System.out.println("sql == null");
+		try {
+			while(result.next()){
+				return "" + (result.getInt("catchID")+1);
+			}
+			return "0";
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return "-1";
+	}
 	
-	//public String insertStatement(String [] statement){
+	public void insertCatch(String username, String date, String bait, String note, String conditions, String species, double length, double weight, String imageLocation){
+		stmt = createStatement();	
+		int nextCatch = Integer.parseInt(getNextCatchForUser(username));
+		String sql = "insert into catch (catchID, username) values (" + nextCatch + ", '" + username + "')";
+		execute(sql);
+		System.out.println("1");
 		
-	//}
+		stmt = createStatement();
+		sql = "insert into fish_images (username, catchID, image_url) values ('" + username + "', " + nextCatch + " , '" + imageLocation + "')";
+		execute(sql);
+		System.out.println("2");
+		
+		stmt = createStatement();
+		sql = "insert into catch_data (catchID, username, date, bait, length, note, conditions, species, weight) values " +
+		"(" + nextCatch + ", '" + username + "', '" + date + "', '" + bait + "', " + length + ", '" + note + "', '" + conditions + "', '" + species + "', " + weight + ")";
+		execute(sql);
+		System.out.println("3");
+	}
 	
 	public boolean addUser(String username, String password) throws SQLException{
 		stmt = createStatement();
@@ -66,7 +94,6 @@ public class DatabaseHandler {
 		
 		return result.getInt("total") > 0;
 	}
-	
 	
 	private int countUsers(){
 		stmt = createStatement();

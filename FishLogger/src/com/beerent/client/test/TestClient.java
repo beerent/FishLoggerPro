@@ -1,11 +1,15 @@
 package com.beerent.client.test;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import com.fishloggerpro.srv.Catch;
 
 public class TestClient {
 	private Socket socket;
@@ -21,7 +25,7 @@ public class TestClient {
 		TestClient testClient = new TestClient("beerent", "password1");
 		//testClient.testNewUser(username, password);
 		testClient.testLogin(username, password);
-		//testClient.testAddFish();
+		testClient.testAddFish();
 		
 	}
 	
@@ -50,20 +54,36 @@ public class TestClient {
 	public void testLogin(String username, String password){
 		connect();
 		read();
-		out.println("login;"+username+";"+password);
+		out.println("login");
+		read();
+		out.println(this.username);
+		read();
+		out.println(this.password);
 		String result = read();
+		if(result.equals("-1")){
+			System.out.println("connection with server failed.");
+			System.exit(1);
+		}
 		this.connectionKey = result;
-		System.out.println(result + " of length " + result.length());
+		System.out.println("key: " + result + " of length " + result.length());
 	}
 	
 	public void testAddFish(){
 		connect();
 		read();
-		out.println("add;"+this.connectionKey);
-		if(read().equals("-1"))
-			System.out.println("connection authentication failed");
-		else{
-			System.out.println("user recognized");
+		out.println(this.connectionKey);
+		read();
+		out.println("add");
+		read();
+		try {
+			//String species, String note, double weight, double length, String bait, String conditions, String latitude, String longitude
+			File f = new File("/home/brent/workspace/FishLogger/src/com/beerent/client/test/img.jpg");
+			Catch c = new Catch("LM Bass", "this is the note", 12.6, 12.5, "crankbait", "rainy", "latitude", "longitude", f);
+			ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+			output.writeObject(c);
+			System.out.println("done");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
