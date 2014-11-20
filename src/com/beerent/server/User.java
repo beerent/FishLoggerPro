@@ -1,5 +1,3 @@
-package com.beerent.server;
-
 public class User {
 	private String username;
 	private int userID;
