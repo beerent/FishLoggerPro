@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 
 public class DatabaseHandler {
 	private Connection conn;
@@ -44,8 +45,18 @@ public class DatabaseHandler {
 		}
 		return "-1";
 	}
-	
-	public void insertCatch(String username, String date, String bait, String note, String conditions, String species, double length, double weight, String imageLocation){
+
+	public void insertCatch(String username, String species, String note, String bait, String conditions, String latitude, String longitude, String weight, String length, String date, String imageLocation){
+		Date d1 = null;
+		try{
+			SimpleDateFormat dateFormatOfStringInDB = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+			d1 = dateFormatOfStringInDB.parse(date);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			date = sdf.format(d1);
+		}catch(Exception e){
+
+		}
+
 		stmt = createStatement();	
 		int nextCatch = Integer.parseInt(getNextCatchForUser(username));
 		String sql = "insert into catch (catchID, username) values (" + nextCatch + ", '" + username + "')";
@@ -58,8 +69,8 @@ public class DatabaseHandler {
 		System.out.println("2");
 		
 		stmt = createStatement();
-		sql = "insert into catch_data (catchID, username, date, bait, length, note, conditions, species, weight) values " +
-		"(" + nextCatch + ", '" + username + "', '" + date + "', '" + bait + "', " + length + ", '" + note + "', '" + conditions + "', '" + species + "', " + weight + ")";
+		sql = "insert into catch_data (catchID, username, date, bait, length, note, conditions, species, weight, longitude, latitude) values " +
+		"(" + nextCatch + ", '" + username + "', '" + date + "', '" + bait + "', " + length + ", '" + note + "', '" + conditions + "', '" + species + "', " + weight + ", " + longitude + ", " + latitude + ")";
 		execute(sql);
 		System.out.println("3");
 	}
